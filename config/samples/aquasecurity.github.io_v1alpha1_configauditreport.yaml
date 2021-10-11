@@ -1,0 +1,7 @@
+apiVersion: aquasecurity.github.io.my.domain/v1alpha1
+kind: ConfigAuditReport
+metadata:
+  name: configauditreport-sample
+spec:
+  # Add fields here
+  foo: bar
