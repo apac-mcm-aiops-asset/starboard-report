@@ -5,6 +5,17 @@ metadata:
     control-plane: controller-manager
   name: system
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: report
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+  selector:
+    app: report
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -29,10 +40,12 @@ spec:
           emptyDir: {}
       containers:
       - name: nginx
-        image: nginx:1.16
+        image: jorgeandrada/nginx-autoindex:latest
+        ports:
+        - containerPort: 80
         volumeMounts:
         - name: storage
-          mountPath: /report
+          mountPath: /usr/share/nginx/html
       - command:
         - /manager
         args:

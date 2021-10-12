@@ -2,10 +2,10 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: configauditreport-viewer-role
+  name: manager-role
 rules:
 - apiGroups:
-  - aquasecurity.github.io.my.domain
+  - aquasecurity.github.io
   resources:
   - configauditreports
   verbs:
@@ -13,7 +13,7 @@ rules:
   - list
   - watch
 - apiGroups:
-  - aquasecurity.github.io.my.domain
+  - aquasecurity.github.io
   resources:
   - configauditreports/status
   verbs:

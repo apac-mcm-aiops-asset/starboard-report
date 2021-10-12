@@ -1,0 +1,132 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    app: report
+    control-plane: controller-manager
+  name: starboard-report-system
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app: report
+  name: starboard-report-controller-manager
+  namespace: starboard-report-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app: report
+  name: starboard-report-manager-role
+rules:
+- apiGroups:
+  - aquasecurity.github.io
+  resources:
+  - configauditreports
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - aquasecurity.github.io
+  resources:
+  - configauditreports/status
+  verbs:
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app: report
+  name: starboard-report-manager-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: starboard-report-manager-role
+subjects:
+- kind: ServiceAccount
+  name: starboard-report-controller-manager
+  namespace: starboard-report-system
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: report
+  name: starboard-report-report
+  namespace: starboard-report-system
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+  selector:
+    app: report
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: report
+    control-plane: controller-manager
+  name: starboard-report-controller-manager
+  namespace: starboard-report-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: report
+      control-plane: controller-manager
+  template:
+    metadata:
+      labels:
+        app: report
+        control-plane: controller-manager
+    spec:
+      containers:
+      - image: jorgeandrada/nginx-autoindex:latest
+        name: nginx
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - mountPath: /usr/share/nginx/html
+          name: storage
+      - args:
+        - --leader-elect
+        command:
+        - /manager
+        image: quay.io/pengli1707/starboardcontroller:latest
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8081
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        name: manager
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8081
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources:
+          limits:
+            cpu: 100m
+            memory: 30Mi
+          requests:
+            cpu: 100m
+            memory: 20Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+        volumeMounts:
+        - mountPath: /report
+          name: storage
+      securityContext:
+        runAsNonRoot: true
+      serviceAccountName: starboard-report-controller-manager
+      terminationGracePeriodSeconds: 10
+      volumes:
+      - emptyDir: {}
+        name: storage

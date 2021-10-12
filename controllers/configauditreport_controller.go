@@ -31,7 +31,7 @@ import (
 )
 
 const (
-	reportPath = "/report"
+	reportPath = "/report/"
 )
 
 // ConfigAuditReportReconciler reconciles a ConfigAuditReport object
@@ -76,8 +76,19 @@ func (r *ConfigAuditReportReconciler) Reconcile(ctx context.Context, req ctrl.Re
 		return reconcile.Result{}, nil
 	}
 
+	// get owner of instance, maybe Replicaset, Pod .etc
+	var ownerType, ownerName string
+	for _, ref := range instance.GetOwnerReferences() {
+		ownerType = ref.Kind
+		ownerName = ref.Name
+
+		break
+	}
+
+	command := buildCommand(ownerType, ownerName)
+	logger.Info(command)
 	// try to run the command here: "starboard get report deployment/nginx > nginx.deploy.html"
-	cmd := exec.Command("sh", "-c", "starboard get report deployment/nginx > /report/nginx.deploy.html")
+	cmd := exec.Command("sh", "-c", command)
 	logger.Info("Exporting report and waiting for it to finish...")
 	err = cmd.Run()
 	if err != nil {
@@ -92,4 +103,9 @@ func (r *ConfigAuditReportReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&aquasecurityv1alpha1.ConfigAuditReport{}).
 		Complete(r)
+}
+
+// try to run the command here: "starboard get report deployment/nginx > nginx.deploy.html"
+func buildCommand(workloadType, workloadName string) string {
+	return "starboard get report " + workloadType + "/" + workloadName + " > " + reportPath + workloadName + "." + workloadType + ".html"
 }
