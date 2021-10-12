@@ -31,8 +31,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	aquasecuritygithubiov1alpha1 "github.com/apac-mcm-aiops-asset/starboard-report/api/v1alpha1"
 	"github.com/apac-mcm-aiops-asset/starboard-report/controllers"
+	aquasecurityv1alpha1 "github.com/aquasecurity/starboard/pkg/apis/aquasecurity/v1alpha1"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -44,7 +44,7 @@ var (
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
-	utilruntime.Must(aquasecuritygithubiov1alpha1.AddToScheme(scheme))
+	utilruntime.Must(aquasecurityv1alpha1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 

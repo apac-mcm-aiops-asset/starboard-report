@@ -24,12 +24,23 @@ spec:
     spec:
       securityContext:
         runAsNonRoot: true
+      volumes:
+        - name: storage
+          emptyDir: {}
       containers:
+      - name: nginx
+        image: nginx:1.16
+        volumeMounts:
+        - name: storage
+          mountPath: /report
       - command:
         - /manager
         args:
         - --leader-elect
         image: controller:latest
+        volumeMounts:
+        - name: storage
+          mountPath: /report
         name: manager
         securityContext:
           allowPrivilegeEscalation: false

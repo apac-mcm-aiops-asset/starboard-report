@@ -18,13 +18,20 @@ package controllers
 
 import (
 	"context"
+	"os/exec"
 
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	aquasecuritygithubiov1alpha1 "github.com/apac-mcm-aiops-asset/starboard-report/api/v1alpha1"
+	aquasecurityv1alpha1 "github.com/aquasecurity/starboard/pkg/apis/aquasecurity/v1alpha1"
+)
+
+const (
+	reportPath = "/report"
 )
 
 // ConfigAuditReportReconciler reconciles a ConfigAuditReport object
@@ -47,9 +54,35 @@ type ConfigAuditReportReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.8.3/pkg/reconcile
 func (r *ConfigAuditReportReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
+	logger := log.FromContext(ctx)
 
 	// your logic here
+	// Fetch the ConfigAuditReport instance
+	instance := &aquasecurityv1alpha1.ConfigAuditReport{}
+	err := r.Client.Get(context.TODO(), req.NamespacedName, instance)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			// Request object not found, could have been deleted after reconcile request.
+			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
+			// Return and don't requeue
+			return reconcile.Result{}, nil
+		}
+		// Error reading the object - requeue the request.
+		return reconcile.Result{}, err
+	}
+
+	if !instance.ObjectMeta.DeletionTimestamp.IsZero() {
+		// The object is not being deleted, so do nothing
+		return reconcile.Result{}, nil
+	}
+
+	// try to run the command here: "starboard get report deployment/nginx > nginx.deploy.html"
+	cmd := exec.Command("sh", "-c", "starboard get report deployment/nginx > /report/nginx.deploy.html")
+	logger.Info("Exporting report and waiting for it to finish...")
+	err = cmd.Run()
+	if err != nil {
+		logger.Error(err, "Exporting report finished with error")
+	}
 
 	return ctrl.Result{}, nil
 }
@@ -57,6 +90,6 @@ func (r *ConfigAuditReportReconciler) Reconcile(ctx context.Context, req ctrl.Re
 // SetupWithManager sets up the controller with the Manager.
 func (r *ConfigAuditReportReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&aquasecuritygithubiov1alpha1.ConfigAuditReport{}).
+		For(&aquasecurityv1alpha1.ConfigAuditReport{}).
 		Complete(r)
 }
