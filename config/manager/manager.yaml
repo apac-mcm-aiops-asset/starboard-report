@@ -12,6 +12,7 @@ metadata:
 spec:
   ports:
   - port: 80
+    targetPort: 8080
     protocol: TCP
   selector:
     app: report
@@ -38,19 +39,32 @@ spec:
       volumes:
         - name: storage
           emptyDir: {}
+        - name: nginx-config
+          configMap:
+            name: nginx-conf
       containers:
       - name: nginx
-        image: jorgeandrada/nginx-autoindex:latest
+        image: nginxinc/nginx-unprivileged:1.16.1-alpine
         ports:
-        - containerPort: 80
+        - containerPort: 8080
         volumeMounts:
         - name: storage
           mountPath: /usr/share/nginx/html
+        - name: nginx-config
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
       - command:
         - /manager
         args:
         - --leader-elect
-        image: controller:latest
+        - --namespace=$(NAMESPACE_WATCH)
+        image: quay.io/pengli1707/starboardcontroller:latest
+        env:
+        - name: NAMESPACE_WATCH
+          valueFrom:
+            configMapKeyRef:
+              name: report
+              key: namespaceWatch
         volumeMounts:
         - name: storage
           mountPath: /report

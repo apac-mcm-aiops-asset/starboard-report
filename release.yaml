@@ -25,6 +25,7 @@ rules:
   - aquasecurity.github.io
   resources:
   - configauditreports
+  - vulnerabilityreports
   verbs:
   - get
   - list
@@ -35,6 +36,28 @@ rules:
   - configauditreports/status
   verbs:
   - get
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - create
+  - update
+  - delete
+  - list
+  - watch
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - get
+  - create
+  - update
+  - delete
+  - list
+  - watch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -52,6 +75,42 @@ subjects:
   namespace: starboard-report-system
 ---
 apiVersion: v1
+data:
+  nginx.conf: |
+    worker_processes  3;
+    pid /tmp/nginx.pid; # Changed from /var/run/nginx.pid
+    error_log  /var/log/nginx/error.log;
+    events {
+      worker_connections  10240;
+    }
+    http {
+      server {
+          listen       8080; # Changed from default 80 port
+          server_name  _;
+          location / {
+              root /usr/share/nginx/html;
+              autoindex on;
+          }
+      }
+    }
+kind: ConfigMap
+metadata:
+  labels:
+    app: report
+  name: starboard-report-nginx-conf
+  namespace: starboard-report-system
+---
+apiVersion: v1
+data:
+  namespaceWatch: default
+kind: ConfigMap
+metadata:
+  labels:
+    app: report
+  name: starboard-report-report
+  namespace: starboard-report-system
+---
+apiVersion: v1
 kind: Service
 metadata:
   labels:
@@ -62,6 +121,7 @@ spec:
   ports:
   - port: 80
     protocol: TCP
+    targetPort: 8080
   selector:
     app: report
 ---
@@ -86,17 +146,27 @@ spec:
         control-plane: controller-manager
     spec:
       containers:
-      - image: jorgeandrada/nginx-autoindex:latest
+      - image: nginxinc/nginx-unprivileged:1.16.1-alpine
         name: nginx
         ports:
-        - containerPort: 80
+        - containerPort: 8080
         volumeMounts:
         - mountPath: /usr/share/nginx/html
           name: storage
+        - mountPath: /etc/nginx/nginx.conf
+          name: nginx-config
+          subPath: nginx.conf
       - args:
         - --leader-elect
+        - --namespace=$(NAMESPACE_WATCH)
         command:
         - /manager
+        env:
+        - name: NAMESPACE_WATCH
+          valueFrom:
+            configMapKeyRef:
+              key: namespaceWatch
+              name: starboard-report-report
         image: quay.io/pengli1707/starboardcontroller:latest
         livenessProbe:
           httpGet:
@@ -130,3 +200,6 @@ spec:
       volumes:
       - emptyDir: {}
         name: storage
+      - configMap:
+          name: starboard-report-nginx-conf
+        name: nginx-config

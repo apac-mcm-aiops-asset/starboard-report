@@ -8,6 +8,7 @@ rules:
   - aquasecurity.github.io
   resources:
   - configauditreports
+  - vulnerabilityreports
   verbs:
   - get
   - list
@@ -18,3 +19,25 @@ rules:
   - configauditreports/status
   verbs:
   - get
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - create
+  - update
+  - delete
+  - list
+  - watch
+- apiGroups:
+  - "coordination.k8s.io"
+  resources:
+  - leases
+  verbs:
+  - get
+  - create
+  - update
+  - delete
+  - list
+  - watch

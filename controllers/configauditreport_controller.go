@@ -37,7 +37,8 @@ const (
 // ConfigAuditReportReconciler reconciles a ConfigAuditReport object
 type ConfigAuditReportReconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
+	Scheme           *runtime.Scheme
+	NamespaceWatched string
 }
 
 //+kubebuilder:rbac:groups=aquasecurity.github.io.my.domain,resources=configauditreports,verbs=get;list;watch;create;update;patch;delete
@@ -81,11 +82,10 @@ func (r *ConfigAuditReportReconciler) Reconcile(ctx context.Context, req ctrl.Re
 	for _, ref := range instance.GetOwnerReferences() {
 		ownerType = ref.Kind
 		ownerName = ref.Name
-
 		break
 	}
 
-	command := buildCommand(ownerType, ownerName)
+	command := r.buildCommand(ownerType, ownerName)
 	logger.Info(command)
 	// try to run the command here: "starboard get report deployment/nginx > nginx.deploy.html"
 	cmd := exec.Command("sh", "-c", command)
@@ -93,6 +93,7 @@ func (r *ConfigAuditReportReconciler) Reconcile(ctx context.Context, req ctrl.Re
 	err = cmd.Run()
 	if err != nil {
 		logger.Error(err, "Exporting report finished with error")
+		return reconcile.Result{}, err
 	}
 
 	return ctrl.Result{}, nil
@@ -106,6 +107,6 @@ func (r *ConfigAuditReportReconciler) SetupWithManager(mgr ctrl.Manager) error {
 }
 
 // try to run the command here: "starboard get report deployment/nginx > nginx.deploy.html"
-func buildCommand(workloadType, workloadName string) string {
-	return "starboard get report " + workloadType + "/" + workloadName + " > " + reportPath + workloadName + "." + workloadType + ".html"
+func (r *ConfigAuditReportReconciler) buildCommand(workloadType, workloadName string) string {
+	return "starboard -n " + r.NamespaceWatched + " get report " + workloadType + "/" + workloadName + " > " + reportPath + workloadName + "." + workloadType + ".html"
 }
