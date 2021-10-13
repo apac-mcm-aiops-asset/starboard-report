@@ -33,7 +33,7 @@ spec:
                 - ALL
           env:
             - name: OPERATOR_NAMESPACE
-              value: "starboard-operator"
+              value: "starboard-report-system"
             - name: OPERATOR_TARGET_NAMESPACES
               value: "default"
             - name: OPERATOR_LOG_DEV_MODE

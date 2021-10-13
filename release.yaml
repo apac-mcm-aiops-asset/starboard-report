@@ -489,7 +489,7 @@ kind: ServiceAccount
 metadata:
   labels:
     app: report
-  name: starboard-report-controller-manager
+  name: controller-manager
   namespace: starboard-report-system
 ---
 apiVersion: v1
@@ -497,7 +497,7 @@ kind: ServiceAccount
 metadata:
   labels:
     app: report
-  name: starboard-report-starboard-operator
+  name: starboard-operator
   namespace: starboard-report-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -505,7 +505,7 @@ kind: ClusterRole
 metadata:
   labels:
     app: report
-  name: starboard-report-manager-role
+  name: manager-role
 rules:
 - apiGroups:
   - aquasecurity.github.io
@@ -550,7 +550,7 @@ kind: ClusterRole
 metadata:
   labels:
     app: report
-  name: starboard-report-starboard-operator
+  name: starboard-operator
 rules:
 - apiGroups:
   - ""
@@ -668,14 +668,14 @@ kind: ClusterRoleBinding
 metadata:
   labels:
     app: report
-  name: starboard-report-manager-rolebinding
+  name: manager-rolebinding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: starboard-report-manager-role
+  name: manager-role
 subjects:
 - kind: ServiceAccount
-  name: starboard-report-controller-manager
+  name: controller-manager
   namespace: starboard-report-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -683,14 +683,14 @@ kind: ClusterRoleBinding
 metadata:
   labels:
     app: report
-  name: starboard-report-starboard-operator
+  name: starboard-operator
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: starboard-report-starboard-operator
+  name: starboard-operator
 subjects:
 - kind: ServiceAccount
-  name: starboard-report-starboard-operator
+  name: starboard-operator
   namespace: starboard-report-system
 ---
 apiVersion: v1
@@ -716,7 +716,7 @@ kind: ConfigMap
 metadata:
   labels:
     app: report
-  name: starboard-report-nginx-conf
+  name: nginx-conf
   namespace: starboard-report-system
 ---
 apiVersion: v1
@@ -726,7 +726,7 @@ kind: ConfigMap
 metadata:
   labels:
     app: report
-  name: starboard-report-report
+  name: report
   namespace: starboard-report-system
 ---
 apiVersion: v1
@@ -925,7 +925,7 @@ metadata:
   labels:
     app: report
     app.kubernetes.io/managed-by: starboard
-  name: starboard-report-starboard-polaris-config
+  name: starboard-polaris-config
   namespace: starboard-report-system
 ---
 apiVersion: v1
@@ -942,7 +942,7 @@ metadata:
   labels:
     app: report
     app.kubernetes.io/managed-by: starboard
-  name: starboard-report-starboard-trivy-config
+  name: starboard-trivy-config
   namespace: starboard-report-system
 ---
 apiVersion: v1
@@ -955,7 +955,7 @@ metadata:
   labels:
     app: report
     app.kubernetes.io/managed-by: starboard
-  name: starboard-report-starboard
+  name: starboard
   namespace: starboard-report-system
 ---
 apiVersion: v1
@@ -964,7 +964,7 @@ metadata:
   labels:
     app: report
     app.kubernetes.io/managed-by: starboard
-  name: starboard-report-starboard
+  name: starboard
   namespace: starboard-report-system
 ---
 apiVersion: v1
@@ -972,7 +972,7 @@ kind: Service
 metadata:
   labels:
     app: report
-  name: starboard-report-report
+  name: report
   namespace: starboard-report-system
 spec:
   ports:
@@ -988,7 +988,7 @@ metadata:
   labels:
     app: report
     control-plane: controller-manager
-  name: starboard-report-controller-manager
+  name: controller-manager
   namespace: starboard-report-system
 spec:
   replicas: 1
@@ -1023,7 +1023,7 @@ spec:
           valueFrom:
             configMapKeyRef:
               key: namespaceWatch
-              name: starboard-report-report
+              name: report
         image: quay.io/pengli1707/starboardcontroller:latest
         livenessProbe:
           httpGet:
@@ -1052,13 +1052,13 @@ spec:
           name: storage
       securityContext:
         runAsNonRoot: true
-      serviceAccountName: starboard-report-controller-manager
+      serviceAccountName: controller-manager
       terminationGracePeriodSeconds: 10
       volumes:
       - emptyDir: {}
         name: storage
       - configMap:
-          name: starboard-report-nginx-conf
+          name: nginx-conf
         name: nginx-config
 ---
 apiVersion: apps/v1
@@ -1066,7 +1066,7 @@ kind: Deployment
 metadata:
   labels:
     app: report
-  name: starboard-report-starboard-operator
+  name: starboard-operator
   namespace: starboard-report-system
 spec:
   replicas: 1
@@ -1084,7 +1084,7 @@ spec:
       containers:
       - env:
         - name: OPERATOR_NAMESPACE
-          value: starboard-operator
+          value: starboard-report-system
         - name: OPERATOR_TARGET_NAMESPACES
           value: default
         - name: OPERATOR_LOG_DEV_MODE
@@ -1139,4 +1139,4 @@ spec:
           privileged: false
           readOnlyRootFilesystem: true
       securityContext: {}
-      serviceAccountName: starboard-report-starboard-operator
+      serviceAccountName: starboard-operator

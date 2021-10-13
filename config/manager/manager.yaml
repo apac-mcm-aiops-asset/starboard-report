@@ -3,7 +3,7 @@ kind: Namespace
 metadata:
   labels:
     control-plane: controller-manager
-  name: system
+  name: starboard-report-system
 ---
 apiVersion: v1
 kind: Service
