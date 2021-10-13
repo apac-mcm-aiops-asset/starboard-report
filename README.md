@@ -30,10 +30,10 @@ So, the repo will be part of `application`'s artifact, act as a security/complia
     starboard-operator-7f756cf4c5-nl8qp   1/1     Running   0          13m
     ```
 
-2. Forward the port to access the nginx(will craete `route/ingress` later)
+2. Forward the port to access the nginx(will craete `route/ingress` later)  
    `kubectl -n starboard-report-system port-forward service/report 8888:80 --address 0.0.0.0`
 
-3. Create a sample in the `namespace`: default
+3. Create a sample in the `namespace`: default  
    `kubectl create deployment nginx --image nginx:1.16`
 
 4. Check the report:
