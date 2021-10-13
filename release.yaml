@@ -6,12 +6,498 @@ metadata:
     control-plane: controller-manager
   name: starboard-report-system
 ---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  labels:
+    app: report
+    app.kubernetes.io/managed-by: starboard
+  name: ciskubebenchreports.aquasecurity.github.io
+spec:
+  group: aquasecurity.github.io
+  names:
+    categories:
+    - all
+    kind: CISKubeBenchReport
+    listKind: CISKubeBenchReportList
+    plural: ciskubebenchreports
+    shortNames:
+    - kubebench
+    singular: ciskubebenchreport
+  scope: Cluster
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .report.scanner.name
+      name: Scanner
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    - jsonPath: .report.summary.failCount
+      name: Fail
+      priority: 1
+      type: integer
+    - jsonPath: .report.summary.warnCount
+      name: Warn
+      priority: 1
+      type: integer
+    - jsonPath: .report.summary.infoCount
+      name: Info
+      priority: 1
+      type: integer
+    - jsonPath: .report.summary.passCount
+      name: Pass
+      priority: 1
+      type: integer
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        type: object
+        x-kubernetes-preserve-unknown-fields: true
+    served: true
+    storage: true
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  labels:
+    app: report
+    app.kubernetes.io/managed-by: starboard
+  name: clusterconfigauditreports.aquasecurity.github.io
+spec:
+  group: aquasecurity.github.io
+  names:
+    categories:
+    - all
+    kind: ClusterConfigAuditReport
+    listKind: ClusterConfigAuditReportList
+    plural: clusterconfigauditreports
+    shortNames:
+    - clusterconfigaudit
+    singular: clusterconfigauditreport
+  scope: Cluster
+  versions:
+  - additionalPrinterColumns:
+    - description: The name of the config audit scanner
+      jsonPath: .report.scanner.name
+      name: Scanner
+      type: string
+    - description: The age of the report
+      jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    - description: The number of checks that failed with Danger status
+      jsonPath: .report.summary.dangerCount
+      name: Danger
+      priority: 1
+      type: integer
+    - description: The number of checks that failed with Warning status
+      jsonPath: .report.summary.warningCount
+      name: Warning
+      priority: 1
+      type: integer
+    - description: The number of checks that passed
+      jsonPath: .report.summary.passCount
+      name: Pass
+      priority: 1
+      type: integer
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        type: object
+        x-kubernetes-preserve-unknown-fields: true
+    served: true
+    storage: true
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  labels:
+    app: report
+    app.kubernetes.io/managed-by: starboard
+  name: configauditreports.aquasecurity.github.io
+spec:
+  group: aquasecurity.github.io
+  names:
+    categories:
+    - all
+    kind: ConfigAuditReport
+    listKind: ConfigAuditReportList
+    plural: configauditreports
+    shortNames:
+    - configaudit
+    singular: configauditreport
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: The name of the config audit scanner
+      jsonPath: .report.scanner.name
+      name: Scanner
+      type: string
+    - description: The age of the report
+      jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    - description: The number of checks that failed with Danger status
+      jsonPath: .report.summary.dangerCount
+      name: Danger
+      priority: 1
+      type: integer
+    - description: The number of checks that failed with Warning status
+      jsonPath: .report.summary.warningCount
+      name: Warning
+      priority: 1
+      type: integer
+    - description: The number of checks that passed
+      jsonPath: .report.summary.passCount
+      name: Pass
+      priority: 1
+      type: integer
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        type: object
+        x-kubernetes-preserve-unknown-fields: true
+    served: true
+    storage: true
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  labels:
+    app: report
+    app.kubernetes.io/managed-by: starboard
+  name: kubehunterreports.aquasecurity.github.io
+spec:
+  group: aquasecurity.github.io
+  names:
+    categories:
+    - all
+    kind: KubeHunterReport
+    listKind: KubeHunterReportList
+    plural: kubehunterreports
+    shortNames:
+    - kubehunter
+    singular: kubehunterreport
+  scope: Cluster
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .report.scanner.name
+      name: Scanner
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    - jsonPath: .report.summary.highCount
+      name: High
+      priority: 1
+      type: integer
+    - jsonPath: .report.summary.mediumCount
+      name: Medium
+      priority: 1
+      type: integer
+    - jsonPath: .report.summary.lowCount
+      name: Low
+      priority: 1
+      type: integer
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          report:
+            properties:
+              scanner:
+                properties:
+                  name:
+                    type: string
+                  vendor:
+                    type: string
+                  version:
+                    type: string
+                required:
+                - name
+                - vendor
+                - version
+                type: object
+              summary:
+                properties:
+                  highCount:
+                    minimum: 0
+                    type: integer
+                  lowCount:
+                    minimum: 0
+                    type: integer
+                  mediumCount:
+                    minimum: 0
+                    type: integer
+                  unknownCount:
+                    minimum: 0
+                    type: integer
+                required:
+                - highCount
+                - mediumCount
+                - lowCount
+                - unknownCount
+                type: object
+              vulnerabilities:
+                items:
+                  properties:
+                    avd_reference:
+                      type: string
+                    category:
+                      type: string
+                    description:
+                      type: string
+                    evidence:
+                      type: string
+                    location:
+                      type: string
+                    severity:
+                      enum:
+                      - high
+                      - medium
+                      - low
+                      - unknown
+                      type: string
+                    vid:
+                      type: string
+                    vulnerability:
+                      type: string
+                  required:
+                  - location
+                  - vid
+                  - category
+                  - severity
+                  - vulnerability
+                  - description
+                  - evidence
+                  - avd_reference
+                  type: object
+                type: array
+            required:
+            - scanner
+            - summary
+            - vulnerabilities
+            type: object
+        required:
+        - apiVersion
+        - kind
+        - metadata
+        - report
+        type: object
+    served: true
+    storage: true
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  labels:
+    app: report
+    app.kubernetes.io/managed-by: starboard
+  name: vulnerabilityreports.aquasecurity.github.io
+spec:
+  group: aquasecurity.github.io
+  names:
+    categories:
+    - all
+    kind: VulnerabilityReport
+    listKind: VulnerabilityReportList
+    plural: vulnerabilityreports
+    shortNames:
+    - vuln
+    - vulns
+    singular: vulnerabilityreport
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: The name of image repository
+      jsonPath: .report.artifact.repository
+      name: Repository
+      type: string
+    - description: The name of image tag
+      jsonPath: .report.artifact.tag
+      name: Tag
+      type: string
+    - description: The name of the vulnerability scanner
+      jsonPath: .report.scanner.name
+      name: Scanner
+      type: string
+    - description: The age of the report
+      jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    - description: The number of critical vulnerabilities
+      jsonPath: .report.summary.criticalCount
+      name: Critical
+      priority: 1
+      type: integer
+    - description: The number of high vulnerabilities
+      jsonPath: .report.summary.highCount
+      name: High
+      priority: 1
+      type: integer
+    - description: The number of medium vulnerabilities
+      jsonPath: .report.summary.mediumCount
+      name: Medium
+      priority: 1
+      type: integer
+    - description: The number of low vulnerabilities
+      jsonPath: .report.summary.lowCount
+      name: Low
+      priority: 1
+      type: integer
+    - description: The number of unknown vulnerabilities
+      jsonPath: .report.summary.unknownCount
+      name: Unknown
+      priority: 1
+      type: integer
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: |
+          VulnerabilityReport summarizes vulnerabilities in application dependencies and operating system packages
+          built into container images.
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          report:
+            properties:
+              artifact:
+                properties:
+                  digest:
+                    type: string
+                  mimeType:
+                    type: string
+                  repository:
+                    type: string
+                  tag:
+                    type: string
+                type: object
+              registry:
+                properties:
+                  server:
+                    type: string
+                type: object
+              scanner:
+                properties:
+                  name:
+                    type: string
+                  vendor:
+                    type: string
+                  version:
+                    type: string
+                required:
+                - name
+                - vendor
+                - version
+                type: object
+              summary:
+                properties:
+                  criticalCount:
+                    minimum: 0
+                    type: integer
+                  highCount:
+                    minimum: 0
+                    type: integer
+                  lowCount:
+                    minimum: 0
+                    type: integer
+                  mediumCount:
+                    minimum: 0
+                    type: integer
+                  unknownCount:
+                    minimum: 0
+                    type: integer
+                required:
+                - criticalCount
+                - highCount
+                - mediumCount
+                - lowCount
+                - unknownCount
+                type: object
+              updateTimestamp:
+                format: date-time
+                type: string
+              vulnerabilities:
+                items:
+                  properties:
+                    description:
+                      type: string
+                    fixedVersion:
+                      type: string
+                    installedVersion:
+                      type: string
+                    links:
+                      items:
+                        type: string
+                      type: array
+                    primaryLink:
+                      type: string
+                    resource:
+                      type: string
+                    score:
+                      type: number
+                    severity:
+                      enum:
+                      - CRITICAL
+                      - HIGH
+                      - MEDIUM
+                      - LOW
+                      - UNKNOWN
+                      type: string
+                    title:
+                      type: string
+                    vulnerabilityID:
+                      type: string
+                  required:
+                  - vulnerabilityID
+                  - resource
+                  - installedVersion
+                  - fixedVersion
+                  - severity
+                  - title
+                  type: object
+                type: array
+            required:
+            - updateTimestamp
+            - scanner
+            - artifact
+            - summary
+            - vulnerabilities
+            type: object
+        required:
+        - apiVersion
+        - kind
+        - metadata
+        - report
+        type: object
+    served: true
+    storage: true
+---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   labels:
     app: report
   name: starboard-report-controller-manager
+  namespace: starboard-report-system
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app: report
+  name: starboard-report-starboard-operator
   namespace: starboard-report-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -60,6 +546,124 @@ rules:
   - watch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app: report
+  name: starboard-report-starboard-operator
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - pods/log
+  - replicationcontrollers
+  - services
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  - secrets
+  - serviceaccounts
+  verbs:
+  - list
+  - watch
+  - get
+  - create
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+- apiGroups:
+  - apps
+  resources:
+  - replicasets
+  - statefulsets
+  - daemonsets
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - batch
+  resources:
+  - jobs
+  - cronjobs
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - roles
+  - rolebindings
+  - clusterroles
+  - clusterrolebindings
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - apiextensions.k8s.io
+  resources:
+  - customresourcedefinitions
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - batch
+  resources:
+  - jobs
+  verbs:
+  - create
+  - delete
+- apiGroups:
+  - aquasecurity.github.io
+  resources:
+  - vulnerabilityreports
+  - configauditreports
+  - clusterconfigauditreports
+  - ciskubebenchreports
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - delete
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - create
+  - get
+  - update
+---
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   labels:
@@ -72,6 +676,21 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: starboard-report-controller-manager
+  namespace: starboard-report-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app: report
+  name: starboard-report-starboard-operator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: starboard-report-starboard-operator
+subjects:
+- kind: ServiceAccount
+  name: starboard-report-starboard-operator
   namespace: starboard-report-system
 ---
 apiVersion: v1
@@ -108,6 +727,244 @@ metadata:
   labels:
     app: report
   name: starboard-report-report
+  namespace: starboard-report-system
+---
+apiVersion: v1
+data:
+  polaris.config.yaml: |
+    checks:
+      # reliability
+      multipleReplicasForDeployment: ignore
+      priorityClassNotSet: ignore
+      # resources
+      cpuRequestsMissing: warning
+      cpuLimitsMissing: warning
+      memoryRequestsMissing: warning
+      memoryLimitsMissing: warning
+      # images
+      tagNotSpecified: danger
+      pullPolicyNotAlways: ignore
+      # healthChecks
+      readinessProbeMissing: warning
+      livenessProbeMissing: warning
+      # networking
+      hostNetworkSet: warning
+      hostPortSet: warning
+      # security
+      hostIPCSet: danger
+      hostPIDSet: danger
+      notReadOnlyRootFilesystem: warning
+      privilegeEscalationAllowed: danger
+      runAsRootAllowed: warning
+      runAsPrivileged: danger
+      dangerousCapabilities: danger
+      insecureCapabilities: warning
+    exemptions:
+      - controllerNames:
+        - kube-apiserver
+        - kube-proxy
+        - kube-scheduler
+        - etcd-manager-events
+        - kube-controller-manager
+        - kube-dns
+        - etcd-manager-main
+        rules:
+        - hostPortSet
+        - hostNetworkSet
+        - readinessProbeMissing
+        - livenessProbeMissing
+        - cpuRequestsMissing
+        - cpuLimitsMissing
+        - memoryRequestsMissing
+        - memoryLimitsMissing
+        - runAsRootAllowed
+        - runAsPrivileged
+        - notReadOnlyRootFilesystem
+        - hostPIDSet
+      - controllerNames:
+        - kube-flannel-ds
+        rules:
+        - notReadOnlyRootFilesystem
+        - runAsRootAllowed
+        - notReadOnlyRootFilesystem
+        - readinessProbeMissing
+        - livenessProbeMissing
+        - cpuLimitsMissing
+      - controllerNames:
+        - cert-manager
+        rules:
+        - notReadOnlyRootFilesystem
+        - runAsRootAllowed
+        - readinessProbeMissing
+        - livenessProbeMissing
+      - controllerNames:
+        - cluster-autoscaler
+        rules:
+        - notReadOnlyRootFilesystem
+        - runAsRootAllowed
+        - readinessProbeMissing
+      - controllerNames:
+        - vpa
+        rules:
+        - runAsRootAllowed
+        - readinessProbeMissing
+        - livenessProbeMissing
+        - notReadOnlyRootFilesystem
+      - controllerNames:
+        - datadog
+        rules:
+        - runAsRootAllowed
+        - readinessProbeMissing
+        - livenessProbeMissing
+        - notReadOnlyRootFilesystem
+      - controllerNames:
+        - nginx-ingress-controller
+        rules:
+        - privilegeEscalationAllowed
+        - insecureCapabilities
+        - runAsRootAllowed
+      - controllerNames:
+        - dns-controller
+        - datadog-datadog
+        - kube-flannel-ds
+        - kube2iam
+        - aws-iam-authenticator
+        - datadog
+        - kube2iam
+        rules:
+        - hostNetworkSet
+      - controllerNames:
+        - aws-iam-authenticator
+        - aws-cluster-autoscaler
+        - kube-state-metrics
+        - dns-controller
+        - external-dns
+        - dnsmasq
+        - autoscaler
+        - kubernetes-dashboard
+        - install-cni
+        - kube2iam
+        rules:
+        - readinessProbeMissing
+        - livenessProbeMissing
+      - controllerNames:
+        - aws-iam-authenticator
+        - nginx-ingress-default-backend
+        - aws-cluster-autoscaler
+        - kube-state-metrics
+        - dns-controller
+        - external-dns
+        - kubedns
+        - dnsmasq
+        - autoscaler
+        - tiller
+        - kube2iam
+        rules:
+        - runAsRootAllowed
+      - controllerNames:
+        - aws-iam-authenticator
+        - nginx-ingress-controller
+        - nginx-ingress-default-backend
+        - aws-cluster-autoscaler
+        - kube-state-metrics
+        - dns-controller
+        - external-dns
+        - kubedns
+        - dnsmasq
+        - autoscaler
+        - tiller
+        - kube2iam
+        rules:
+        - notReadOnlyRootFilesystem
+      - controllerNames:
+        - cert-manager
+        - dns-controller
+        - kubedns
+        - dnsmasq
+        - autoscaler
+        - insights-agent-goldilocks-vpa-install
+        - datadog
+        rules:
+        - cpuRequestsMissing
+        - cpuLimitsMissing
+        - memoryRequestsMissing
+        - memoryLimitsMissing
+      - controllerNames:
+        - kube2iam
+        - kube-flannel-ds
+        rules:
+        - runAsPrivileged
+      - controllerNames:
+        - kube-hunter
+        rules:
+        - hostPIDSet
+      - controllerNames:
+        - polaris
+        - kube-hunter
+        - goldilocks
+        - insights-agent-goldilocks-vpa-install
+        rules:
+        - notReadOnlyRootFilesystem
+      - controllerNames:
+        - insights-agent-goldilocks-controller
+        rules:
+        - livenessProbeMissing
+        - readinessProbeMissing
+      - controllerNames:
+        - insights-agent-goldilocks-vpa-install
+        - kube-hunter
+        rules:
+        - runAsRootAllowed
+  polaris.imageRef: quay.io/fairwinds/polaris:4.0
+  polaris.resources.limits.cpu: 300m
+  polaris.resources.limits.memory: 300M
+  polaris.resources.requests.cpu: 50m
+  polaris.resources.requests.memory: 50M
+kind: ConfigMap
+metadata:
+  labels:
+    app: report
+    app.kubernetes.io/managed-by: starboard
+  name: starboard-report-starboard-polaris-config
+  namespace: starboard-report-system
+---
+apiVersion: v1
+data:
+  trivy.imageRef: docker.io/aquasec/trivy:0.19.2
+  trivy.mode: Standalone
+  trivy.resources.limits.cpu: 500m
+  trivy.resources.limits.memory: 500M
+  trivy.resources.requests.cpu: 100m
+  trivy.resources.requests.memory: 100M
+  trivy.severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
+kind: ConfigMap
+metadata:
+  labels:
+    app: report
+    app.kubernetes.io/managed-by: starboard
+  name: starboard-report-starboard-trivy-config
+  namespace: starboard-report-system
+---
+apiVersion: v1
+data:
+  configAuditReports.scanner: Polaris
+  kube-bench.imageRef: docker.io/aquasec/kube-bench:0.6.3
+  vulnerabilityReports.scanner: Trivy
+kind: ConfigMap
+metadata:
+  labels:
+    app: report
+    app.kubernetes.io/managed-by: starboard
+  name: starboard-report-starboard
+  namespace: starboard-report-system
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    app: report
+    app.kubernetes.io/managed-by: starboard
+  name: starboard-report-starboard
   namespace: starboard-report-system
 ---
 apiVersion: v1
@@ -203,3 +1060,83 @@ spec:
       - configMap:
           name: starboard-report-nginx-conf
         name: nginx-config
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: report
+  name: starboard-report-starboard-operator
+  namespace: starboard-report-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: report
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: report
+    spec:
+      automountServiceAccountToken: true
+      containers:
+      - env:
+        - name: OPERATOR_NAMESPACE
+          value: starboard-operator
+        - name: OPERATOR_TARGET_NAMESPACES
+          value: default
+        - name: OPERATOR_LOG_DEV_MODE
+          value: "false"
+        - name: OPERATOR_CONCURRENT_SCAN_JOBS_LIMIT
+          value: "10"
+        - name: OPERATOR_SCAN_JOB_RETRY_AFTER
+          value: 30s
+        - name: OPERATOR_METRICS_BIND_ADDRESS
+          value: :8080
+        - name: OPERATOR_HEALTH_PROBE_BIND_ADDRESS
+          value: :9090
+        - name: OPERATOR_CIS_KUBERNETES_BENCHMARK_ENABLED
+          value: "true"
+        - name: OPERATOR_VULNERABILITY_SCANNER_ENABLED
+          value: "true"
+        - name: OPERATOR_CONFIG_AUDIT_SCANNER_ENABLED
+          value: "true"
+        - name: OPERATOR_BATCH_DELETE_LIMIT
+          value: "10"
+        - name: OPERATOR_BATCH_DELETE_DELAY
+          value: 10s
+        image: docker.io/aquasec/starboard-operator:0.12.0
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /healthz/
+            port: probes
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          successThreshold: 1
+        name: operator
+        ports:
+        - containerPort: 8080
+          name: metrics
+        - containerPort: 9090
+          name: probes
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /readyz/
+            port: probes
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          successThreshold: 1
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
+      securityContext: {}
+      serviceAccountName: starboard-report-starboard-operator

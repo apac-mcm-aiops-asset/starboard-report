@@ -1,0 +1,6 @@
+resources:
+  - ./02-starboard-operator.sa.yaml
+  - ./03-starboard-operator.clusterrole.yaml
+  - ./04-starboard-operator.clusterrolebinding.yaml
+  - ./05-starboard-operator.config.yaml
+  - ./06-starboard-operator.deployment.yaml
