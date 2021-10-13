@@ -35,7 +35,10 @@ spec:
             - name: OPERATOR_NAMESPACE
               value: "starboard-report-system"
             - name: OPERATOR_TARGET_NAMESPACES
-              value: "default"
+              valueFrom:
+                configMapKeyRef:
+                  name: report
+                  key: namespaceWatch
             - name: OPERATOR_LOG_DEV_MODE
               value: "false"
             - name: OPERATOR_CONCURRENT_SCAN_JOBS_LIMIT

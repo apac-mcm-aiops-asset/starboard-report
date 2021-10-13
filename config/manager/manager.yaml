@@ -15,7 +15,7 @@ spec:
     targetPort: 8080
     protocol: TCP
   selector:
-    app: report
+    app: nginx
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -24,15 +24,18 @@ metadata:
   namespace: system
   labels:
     control-plane: controller-manager
+    app: nginx
 spec:
   selector:
     matchLabels:
       control-plane: controller-manager
+      app: nginx
   replicas: 1
   template:
     metadata:
       labels:
         control-plane: controller-manager
+        app: nginx
     spec:
       securityContext:
         runAsNonRoot: true

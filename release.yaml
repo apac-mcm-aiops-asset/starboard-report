@@ -2,7 +2,6 @@ apiVersion: v1
 kind: Namespace
 metadata:
   labels:
-    app: report
     control-plane: controller-manager
   name: starboard-report-system
 ---
@@ -10,7 +9,6 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   labels:
-    app: report
     app.kubernetes.io/managed-by: starboard
   name: ciskubebenchreports.aquasecurity.github.io
 spec:
@@ -61,7 +59,6 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   labels:
-    app: report
     app.kubernetes.io/managed-by: starboard
   name: clusterconfigauditreports.aquasecurity.github.io
 spec:
@@ -113,7 +110,6 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   labels:
-    app: report
     app.kubernetes.io/managed-by: starboard
   name: configauditreports.aquasecurity.github.io
 spec:
@@ -165,7 +161,6 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   labels:
-    app: report
     app.kubernetes.io/managed-by: starboard
   name: kubehunterreports.aquasecurity.github.io
 spec:
@@ -298,7 +293,6 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   labels:
-    app: report
     app.kubernetes.io/managed-by: starboard
   name: vulnerabilityreports.aquasecurity.github.io
 spec:
@@ -487,24 +481,18 @@ spec:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  labels:
-    app: report
   name: controller-manager
   namespace: starboard-report-system
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  labels:
-    app: report
   name: starboard-operator
   namespace: starboard-report-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  labels:
-    app: report
   name: manager-role
 rules:
 - apiGroups:
@@ -548,8 +536,6 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  labels:
-    app: report
   name: starboard-operator
 rules:
 - apiGroups:
@@ -666,8 +652,6 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  labels:
-    app: report
   name: manager-rolebinding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -681,8 +665,6 @@ subjects:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  labels:
-    app: report
   name: starboard-operator
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -714,8 +696,6 @@ data:
     }
 kind: ConfigMap
 metadata:
-  labels:
-    app: report
   name: nginx-conf
   namespace: starboard-report-system
 ---
@@ -724,8 +704,6 @@ data:
   namespaceWatch: default
 kind: ConfigMap
 metadata:
-  labels:
-    app: report
   name: report
   namespace: starboard-report-system
 ---
@@ -923,7 +901,6 @@ data:
 kind: ConfigMap
 metadata:
   labels:
-    app: report
     app.kubernetes.io/managed-by: starboard
   name: starboard-polaris-config
   namespace: starboard-report-system
@@ -940,7 +917,6 @@ data:
 kind: ConfigMap
 metadata:
   labels:
-    app: report
     app.kubernetes.io/managed-by: starboard
   name: starboard-trivy-config
   namespace: starboard-report-system
@@ -953,7 +929,6 @@ data:
 kind: ConfigMap
 metadata:
   labels:
-    app: report
     app.kubernetes.io/managed-by: starboard
   name: starboard
   namespace: starboard-report-system
@@ -962,7 +937,6 @@ apiVersion: v1
 kind: Secret
 metadata:
   labels:
-    app: report
     app.kubernetes.io/managed-by: starboard
   name: starboard
   namespace: starboard-report-system
@@ -970,8 +944,6 @@ metadata:
 apiVersion: v1
 kind: Service
 metadata:
-  labels:
-    app: report
   name: report
   namespace: starboard-report-system
 spec:
@@ -980,13 +952,13 @@ spec:
     protocol: TCP
     targetPort: 8080
   selector:
-    app: report
+    app: nginx
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: report
+    app: nginx
     control-plane: controller-manager
   name: controller-manager
   namespace: starboard-report-system
@@ -994,12 +966,12 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: report
+      app: nginx
       control-plane: controller-manager
   template:
     metadata:
       labels:
-        app: report
+        app: nginx
         control-plane: controller-manager
     spec:
       containers:
@@ -1065,20 +1037,20 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: report
+    app: starboard-operator
   name: starboard-operator
   namespace: starboard-report-system
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: report
+      app: starboard-operator
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        app: report
+        app: starboard-operator
     spec:
       automountServiceAccountToken: true
       containers:
@@ -1086,7 +1058,10 @@ spec:
         - name: OPERATOR_NAMESPACE
           value: starboard-report-system
         - name: OPERATOR_TARGET_NAMESPACES
-          value: default
+          valueFrom:
+            configMapKeyRef:
+              key: namespaceWatch
+              name: report
         - name: OPERATOR_LOG_DEV_MODE
           value: "false"
         - name: OPERATOR_CONCURRENT_SCAN_JOBS_LIMIT

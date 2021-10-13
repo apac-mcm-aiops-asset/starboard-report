@@ -9,8 +9,8 @@ namespace: starboard-report-system
 # namePrefix: starboard-report-
 
 # Labels to add to all resources and selectors.
-commonLabels:
- app: report
+# commonLabels:
+#  app: report
 
 bases:
 - ../rbac
