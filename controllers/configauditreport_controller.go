@@ -20,8 +20,10 @@ import (
 	"context"
 	"os/exec"
 
+	v1 "k8s.io/api/apps/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -40,10 +42,6 @@ type ConfigAuditReportReconciler struct {
 	Scheme           *runtime.Scheme
 	NamespaceWatched string
 }
-
-//+kubebuilder:rbac:groups=aquasecurity.github.io.my.domain,resources=configauditreports,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=aquasecurity.github.io.my.domain,resources=configauditreports/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=aquasecurity.github.io.my.domain,resources=configauditreports/finalizers,verbs=update
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -83,6 +81,30 @@ func (r *ConfigAuditReportReconciler) Reconcile(ctx context.Context, req ctrl.Re
 		ownerType = ref.Kind
 		ownerName = ref.Name
 		break
+	}
+
+	// if report's owner is ReplicaSet, then found the owner of the ReplicaSet, the Deployment
+	if ownerType == "ReplicaSet" {
+		nameNamespace := types.NamespacedName{
+			Name:      ownerName,
+			Namespace: req.NamespacedName.Namespace,
+		}
+
+		ownerReplicaSet := &v1.ReplicaSet{}
+		err := r.Client.Get(context.TODO(), nameNamespace, ownerReplicaSet)
+		if err != nil {
+			if errors.IsNotFound(err) {
+				return reconcile.Result{}, nil
+			}
+			// Error reading the object - requeue the request.
+			return reconcile.Result{}, err
+		}
+
+		for _, ref := range ownerReplicaSet.GetOwnerReferences() {
+			ownerType = ref.Kind
+			ownerName = ref.Name
+			break
+		}
 	}
 
 	command := r.buildCommand(ownerType, ownerName)

@@ -514,11 +514,21 @@ rules:
   - ""
   resources:
   - configmaps
+  - events
   verbs:
   - get
   - create
   - update
   - delete
+  - list
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - replicasets
+  - deployments
+  verbs:
+  - get
   - list
   - watch
 - apiGroups:
