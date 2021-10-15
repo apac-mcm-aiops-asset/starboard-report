@@ -13,6 +13,8 @@ rules:
   - get
   - list
   - watch
+  - create
+  - update
 - apiGroups:
   - aquasecurity.github.io
   resources:

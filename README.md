@@ -40,4 +40,4 @@ So, the repo will be part of `application`'s artifact, act as a security/complia
    ![starboard](./report.png)
 
 
-For now, the application will watch `namespace`: default, want to change it, please update the configuration in [config](./config/default/configmap.yaml)
+For now, the application will watch `namespace`: default, want to change it, please update the configuration in [config](./config/default/configmap.yaml).
