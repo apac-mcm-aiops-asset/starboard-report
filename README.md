@@ -24,20 +24,31 @@ So, the repo will be part of `application`'s artifact, act as a security/complia
 1. Deploy: `kubectl create -f ./release.yaml`
    check if it works:
    ```
-   root@rentz1:~# kubectl -n starboard-report-system get po
+   # kubectl -n starboard-report-system get po
     NAME                                  READY   STATUS    RESTARTS   AGE
     controller-manager-585bd5b76d-mpzzv   2/2     Running   0          13m
     starboard-operator-7f756cf4c5-nl8qp   1/1     Running   0          13m
     ```
 
-2. Forward the port to access the nginx(will craete `route/ingress` later)  
-   `kubectl -n starboard-report-system port-forward service/report 8888:80 --address 0.0.0.0`
+2. Expose the service
 
-3. Create a sample in the `namespace`: default  
-   `kubectl create deployment nginx --image nginx:1.16`
+  - For OpenShift cluster, you can use `Route` to expose the service:
+     ```
+     # kubectl apply -f route.yaml
+     ```
+  
+  - For Kubenertes cluster, you can forward the port to access the nginx(will craete `route/ingress` later)
+     ```
+     # kubectl -n starboard-report-system port-forward service/report 8888:80 --address 0.0.0.0
+     ```
+
+3. Create a sample in the `namespace`: default
+   ```
+   # kubectl create deployment nginx --image nginx:1.16 -n default
+   ```
 
 4. Check the report:
    ![starboard](./report.png)
 
 
-For now, the application will watch `namespace`: default, want to change it, please update the configuration in [config](./config/default/configmap.yaml).
+For now, the application will watch `namespace`: default, if you want to change it, please update the configuration in [config](./config/default/configmap.yaml).
