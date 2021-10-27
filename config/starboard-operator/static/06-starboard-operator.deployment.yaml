@@ -50,7 +50,7 @@ spec:
             - name: OPERATOR_HEALTH_PROBE_BIND_ADDRESS
               value: ":9090"
             - name: OPERATOR_CIS_KUBERNETES_BENCHMARK_ENABLED
-              value: "true"
+              value: "false"
             - name: OPERATOR_VULNERABILITY_SCANNER_ENABLED
               value: "true"
             - name: OPERATOR_CONFIG_AUDIT_SCANNER_ENABLED
