@@ -482,13 +482,13 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: controller-manager
-  namespace: starboard-report-system
+  namespace: dev
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: starboard-operator
-  namespace: starboard-report-system
+  namespace: dev
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -672,7 +672,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: controller-manager
-  namespace: starboard-report-system
+  namespace: dev
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -685,7 +685,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: starboard-operator
-  namespace: starboard-report-system
+  namespace: dev
 ---
 apiVersion: v1
 data:
@@ -709,15 +709,15 @@ data:
 kind: ConfigMap
 metadata:
   name: nginx-conf
-  namespace: starboard-report-system
+  namespace: dev
 ---
 apiVersion: v1
 data:
-  namespaceWatch: default
+  namespaceWatch: dev
 kind: ConfigMap
 metadata:
   name: report
-  namespace: starboard-report-system
+  namespace: dev
 ---
 apiVersion: v1
 data:
@@ -915,7 +915,7 @@ metadata:
   labels:
     app.kubernetes.io/managed-by: starboard
   name: starboard-polaris-config
-  namespace: starboard-report-system
+  namespace: dev
 ---
 apiVersion: v1
 data:
@@ -931,7 +931,7 @@ metadata:
   labels:
     app.kubernetes.io/managed-by: starboard
   name: starboard-trivy-config
-  namespace: starboard-report-system
+  namespace: dev
 ---
 apiVersion: v1
 data:
@@ -943,7 +943,7 @@ metadata:
   labels:
     app.kubernetes.io/managed-by: starboard
   name: starboard
-  namespace: starboard-report-system
+  namespace: dev
 ---
 apiVersion: v1
 kind: Secret
@@ -951,16 +951,17 @@ metadata:
   labels:
     app.kubernetes.io/managed-by: starboard
   name: starboard
-  namespace: starboard-report-system
+  namespace: dev
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: report
-  namespace: starboard-report-system
+  namespace: dev
 spec:
   ports:
-  - port: 80
+  - name: report
+    port: 80
     protocol: TCP
     targetPort: 8080
   selector:
@@ -971,19 +972,22 @@ kind: Deployment
 metadata:
   labels:
     app: nginx
+    app.kubernetes.io/managed-by: starboard
     control-plane: controller-manager
   name: controller-manager
-  namespace: starboard-report-system
+  namespace: dev
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: nginx
+      app.kubernetes.io/managed-by: starboard
       control-plane: controller-manager
   template:
     metadata:
       labels:
         app: nginx
+        app.kubernetes.io/managed-by: starboard
         control-plane: controller-manager
     spec:
       containers:
@@ -1024,11 +1028,11 @@ spec:
           periodSeconds: 10
         resources:
           limits:
-            cpu: 100m
-            memory: 30Mi
+            cpu: 300m
+            memory: 300Mi
           requests:
-            cpu: 100m
-            memory: 20Mi
+            cpu: 300m
+            memory: 300Mi
         securityContext:
           allowPrivilegeEscalation: false
         volumeMounts:
@@ -1050,25 +1054,28 @@ kind: Deployment
 metadata:
   labels:
     app: starboard-operator
+    app.kubernetes.io/managed-by: starboard
   name: starboard-operator
-  namespace: starboard-report-system
+  namespace: dev
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: starboard-operator
+      app.kubernetes.io/managed-by: starboard
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
         app: starboard-operator
+        app.kubernetes.io/managed-by: starboard
     spec:
       automountServiceAccountToken: true
       containers:
       - env:
         - name: OPERATOR_NAMESPACE
-          value: starboard-report-system
+          value: dev
         - name: OPERATOR_TARGET_NAMESPACES
           valueFrom:
             configMapKeyRef:
@@ -1085,7 +1092,7 @@ spec:
         - name: OPERATOR_HEALTH_PROBE_BIND_ADDRESS
           value: :9090
         - name: OPERATOR_CIS_KUBERNETES_BENCHMARK_ENABLED
-          value: "true"
+          value: "false"
         - name: OPERATOR_VULNERABILITY_SCANNER_ENABLED
           value: "true"
         - name: OPERATOR_CONFIG_AUDIT_SCANNER_ENABLED
@@ -1127,3 +1134,18 @@ spec:
           readOnlyRootFilesystem: true
       securityContext: {}
       serviceAccountName: starboard-operator
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  labels:
+    app: pipelines-vote-ui
+  name: report
+  namespace: dev
+spec:
+  port:
+    targetPort: report
+  to:
+    kind: Service
+    name: report
+    weight: 100

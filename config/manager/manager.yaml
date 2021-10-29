@@ -11,7 +11,8 @@ metadata:
   name: report
 spec:
   ports:
-  - port: 80
+  - name: report
+    port: 80
     targetPort: 8080
     protocol: TCP
   selector:
@@ -25,16 +26,19 @@ metadata:
   labels:
     control-plane: controller-manager
     app: nginx
+    app.kubernetes.io/managed-by: starboard
 spec:
   selector:
     matchLabels:
       control-plane: controller-manager
       app: nginx
+      app.kubernetes.io/managed-by: starboard
   replicas: 1
   template:
     metadata:
       labels:
         control-plane: controller-manager
+        app.kubernetes.io/managed-by: starboard
         app: nginx
     spec:
       securityContext:
@@ -88,10 +92,10 @@ spec:
           periodSeconds: 10
         resources:
           limits:
-            cpu: 100m
+            cpu: 300m
             memory: 300Mi
           requests:
-            cpu: 100m
-            memory: 200Mi
+            cpu: 300m
+            memory: 300Mi
       serviceAccountName: controller-manager
       terminationGracePeriodSeconds: 10

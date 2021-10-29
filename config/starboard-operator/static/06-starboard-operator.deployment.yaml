@@ -5,6 +5,7 @@ metadata:
   name: starboard-operator
   labels:
     app: starboard-operator
+    app.kubernetes.io/managed-by: starboard
 spec:
   replicas: 1
   strategy:
@@ -12,10 +13,12 @@ spec:
   selector:
     matchLabels:
       app: starboard-operator
+      app.kubernetes.io/managed-by: starboard
   template:
     metadata:
       labels:
         app: starboard-operator
+        app.kubernetes.io/managed-by: starboard
     spec:
       serviceAccountName: starboard-operator
       automountServiceAccountToken: true
@@ -33,7 +36,7 @@ spec:
                 - ALL
           env:
             - name: OPERATOR_NAMESPACE
-              value: "starboard-report-system"
+              value: "dev"
             - name: OPERATOR_TARGET_NAMESPACES
               valueFrom:
                 configMapKeyRef:
