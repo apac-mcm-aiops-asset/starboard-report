@@ -678,7 +678,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: starboard-operator
-  namespace: starboard-report-system
+  namespace: dev
 ---
 apiVersion: v1
 data:
