@@ -18,7 +18,6 @@ package controllers
 
 import (
 	"context"
-	"os"
 	"os/exec"
 	"strings"
 
@@ -172,14 +171,14 @@ func (r *ConfigAuditReportReconciler) generateReport(ctx context.Context, worklo
 }
 
 func (r *ConfigAuditReportReconciler) removeReport(workloadInfo string) error {
-	workloadInfos := strings.Split(workloadInfo, "|")
-	workloadType := workloadInfos[0]
-	workloadName := workloadInfos[1]
+	// workloadInfos := strings.Split(workloadInfo, "|")
+	// workloadType := workloadInfos[0]
+	// workloadName := workloadInfos[1]
 
-	err := os.Remove(buildReportName(workloadType, workloadName))
-	if err != nil {
-		return err
-	}
+	// err := os.Remove(buildReportName(workloadType, workloadName))
+	// if err != nil {
+	// 	return err
+	// }
 
 	return nil
 }

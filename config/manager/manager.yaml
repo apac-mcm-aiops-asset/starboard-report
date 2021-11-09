@@ -1,11 +1,4 @@
 apiVersion: v1
-kind: Namespace
-metadata:
-  labels:
-    control-plane: controller-manager
-  name: starboard-report-system
----
-apiVersion: v1
 kind: Service
 metadata:
   name: report
@@ -15,6 +8,10 @@ spec:
     port: 80
     targetPort: 8080
     protocol: TCP
+  - name: list
+    port: 90
+    protocol: TCP
+    targetPort: 8090
   selector:
     app: nginx
 ---
@@ -56,7 +53,7 @@ spec:
         - containerPort: 8080
         volumeMounts:
         - name: storage
-          mountPath: /usr/share/nginx/html
+          mountPath: /usr/share/nginx/html/reports/
         - name: nginx-config
           mountPath: /etc/nginx/nginx.conf
           subPath: nginx.conf
@@ -65,7 +62,7 @@ spec:
         args:
         - --leader-elect
         - --namespace=$(NAMESPACE_WATCH)
-        image: quay.io/pengli1707/starboardcontroller:latest
+        image: quay.io/pengli1707/starboardcontroller:v0.0.4
         env:
         - name: NAMESPACE_WATCH
           valueFrom:
@@ -76,6 +73,8 @@ spec:
         - name: storage
           mountPath: /report
         name: manager
+        ports:
+        - containerPort: 8090
         securityContext:
           allowPrivilegeEscalation: false
         livenessProbe:
