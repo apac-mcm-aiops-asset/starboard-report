@@ -48,7 +48,7 @@ spec:
             name: nginx-conf
       containers:
       - name: nginx
-        image: nginxinc/nginx-unprivileged:1.16.1-alpine
+        image: quay.io/pengli1707/report-gui:v0.0.6
         ports:
         - containerPort: 8080
         volumeMounts:

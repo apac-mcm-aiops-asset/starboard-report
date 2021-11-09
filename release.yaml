@@ -1,10 +1,3 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  labels:
-    control-plane: controller-manager
-  name: starboard-report-system
----
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
@@ -685,11 +678,11 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: starboard-operator
-  namespace: dev
+  namespace: starboard-report-system
 ---
 apiVersion: v1
 data:
-  nginx.conf: |
+  nginx.conf: |-
     worker_processes  3;
     pid /tmp/nginx.pid; # Changed from /var/run/nginx.pid
     error_log  /var/log/nginx/error.log;
@@ -717,6 +710,18 @@ data:
 kind: ConfigMap
 metadata:
   name: report
+  namespace: dev
+---
+apiVersion: v1
+data:
+  configAuditReports.scanner: Polaris
+  kube-bench.imageRef: docker.io/aquasec/kube-bench:0.6.3
+  vulnerabilityReports.scanner: Trivy
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: starboard
+  name: starboard
   namespace: dev
 ---
 apiVersion: v1
@@ -934,18 +939,6 @@ metadata:
   namespace: dev
 ---
 apiVersion: v1
-data:
-  configAuditReports.scanner: Polaris
-  kube-bench.imageRef: docker.io/aquasec/kube-bench:0.6.3
-  vulnerabilityReports.scanner: Trivy
-kind: ConfigMap
-metadata:
-  labels:
-    app.kubernetes.io/managed-by: starboard
-  name: starboard
-  namespace: dev
----
-apiVersion: v1
 kind: Secret
 metadata:
   labels:
@@ -964,6 +957,10 @@ spec:
     port: 80
     protocol: TCP
     targetPort: 8080
+  - name: list
+    port: 90
+    protocol: TCP
+    targetPort: 8090
   selector:
     app: nginx
 ---
@@ -991,12 +988,12 @@ spec:
         control-plane: controller-manager
     spec:
       containers:
-      - image: nginxinc/nginx-unprivileged:1.16.1-alpine
+      - image: quay.io/pengli1707/report-gui:v0.0.6
         name: nginx
         ports:
         - containerPort: 8080
         volumeMounts:
-        - mountPath: /usr/share/nginx/html
+        - mountPath: /usr/share/nginx/html/reports/
           name: storage
         - mountPath: /etc/nginx/nginx.conf
           name: nginx-config
@@ -1012,7 +1009,7 @@ spec:
             configMapKeyRef:
               key: namespaceWatch
               name: report
-        image: quay.io/pengli1707/starboardcontroller:latest
+        image: quay.io/pengli1707/starboardcontroller:v0.0.4
         livenessProbe:
           httpGet:
             path: /healthz
@@ -1020,6 +1017,8 @@ spec:
           initialDelaySeconds: 15
           periodSeconds: 20
         name: manager
+        ports:
+        - containerPort: 8090
         readinessProbe:
           httpGet:
             path: /readyz
@@ -1134,18 +1133,3 @@ spec:
           readOnlyRootFilesystem: true
       securityContext: {}
       serviceAccountName: starboard-operator
----
-apiVersion: route.openshift.io/v1
-kind: Route
-metadata:
-  labels:
-    app: pipelines-vote-ui
-  name: report
-  namespace: dev
-spec:
-  port:
-    targetPort: report
-  to:
-    kind: Service
-    name: report
-    weight: 100
