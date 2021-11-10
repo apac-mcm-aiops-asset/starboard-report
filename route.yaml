@@ -4,7 +4,7 @@ metadata:
   labels:
     app: nginx
   name: report
-  namespace: dev
+  namespace: starboard-report-system
 spec:
   to:
     kind: Service
