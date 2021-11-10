@@ -43,7 +43,13 @@ func (ws *WebServer) Start(context context.Context) error {
 	return nil
 }
 
+func enableCors(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+}
+
 func checkSize(w http.ResponseWriter, req *http.Request) {
+	enableCors(&w)
+
 	filenames, ok := req.URL.Query()["filename"]
 	if !ok || len(filenames[0]) < 1 {
 		log.Println("Url Param 'filename' is missing")
@@ -79,6 +85,8 @@ func checkFileSize(filepath string) error {
 }
 
 func listReport(w http.ResponseWriter, req *http.Request) {
+	enableCors(&w)
+
 	reports, err := getFilelist("/report")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
