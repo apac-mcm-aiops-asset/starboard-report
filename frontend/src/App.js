@@ -29,7 +29,13 @@ class App extends React.Component {
         for(let i=0;i<reports.length;i++){
           let reportItem = {}
           reportItem.reportName = reports[i].Name.substring(0, reports[i].Name.length - 5)
-          reportItem.createTime = new Date(reports[i].CreateTime).toISOString()
+          /*reportItem.createTime = new Date(reports[i].CreateTime).toISOString()*/
+          var timestamp = Date.parse(reports[i].CreateTime)
+          if (isNaN(timestamp) == false) {
+            reportItem.createTime = new Date(timestamp).toISOString()
+          } else {
+            reportItem.createTime = new Date().toISOString()
+          }
           reportItem.size = reports[i].Size
           reportlist.push(reportItem)
         }
