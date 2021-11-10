@@ -10,4 +10,4 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: starboard-operator
-    namespace: dev
+    namespace: starboard-report-system
