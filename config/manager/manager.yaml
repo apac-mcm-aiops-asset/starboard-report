@@ -1,4 +1,11 @@
 apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    control-plane: controller-manager
+  name: starboard-report-system
+---
+apiVersion: v1
 kind: Service
 metadata:
   name: report
@@ -48,7 +55,7 @@ spec:
             name: nginx-conf
       containers:
       - name: nginx
-        image: docker.io/jinchi/nginx-starboard-report:0.1
+        image: jinchi/nginx-starboard-report:0.4
         ports:
         - containerPort: 8080
         volumeMounts:
@@ -62,7 +69,7 @@ spec:
         args:
         - --leader-elect
         - --namespace=$(NAMESPACE_WATCH)
-        image: quay.io/pengli1707/starboardcontroller:v0.0.4
+        image: jinchi/starboardcontroller:0.1
         env:
         - name: NAMESPACE_WATCH
           valueFrom:

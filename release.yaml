@@ -988,7 +988,7 @@ spec:
         control-plane: controller-manager
     spec:
       containers:
-      - image: jinchi/nginx-starboard-report:0.1
+      - image: jinchi/nginx-starboard-report:0.4
         name: nginx
         ports:
         - containerPort: 8080
@@ -1009,7 +1009,7 @@ spec:
             configMapKeyRef:
               key: namespaceWatch
               name: report
-        image: quay.io/pengli1707/starboardcontroller:v0.0.4
+        image: jinchi/starboardcontroller:0.1
         livenessProbe:
           httpGet:
             path: /healthz
