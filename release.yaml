@@ -475,13 +475,13 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: controller-manager
-  namespace: dev
+  namespace: starboard-report-system
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: starboard-operator
-  namespace: dev
+  namespace: starboard-report-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -665,7 +665,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: controller-manager
-  namespace: dev
+  namespace: starboard-report-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -702,15 +702,15 @@ data:
 kind: ConfigMap
 metadata:
   name: nginx-conf
-  namespace: dev
+  namespace: starboard-report-system
 ---
 apiVersion: v1
 data:
-  namespaceWatch: dev
+  namespaceWatch: starboard-report-system
 kind: ConfigMap
 metadata:
   name: report
-  namespace: dev
+  namespace: starboard-report-system
 ---
 apiVersion: v1
 data:
@@ -722,7 +722,7 @@ metadata:
   labels:
     app.kubernetes.io/managed-by: starboard
   name: starboard
-  namespace: dev
+  namespace: starboard-report-system
 ---
 apiVersion: v1
 data:
@@ -920,7 +920,7 @@ metadata:
   labels:
     app.kubernetes.io/managed-by: starboard
   name: starboard-polaris-config
-  namespace: dev
+  namespace: starboard-report-system
 ---
 apiVersion: v1
 data:
@@ -936,7 +936,7 @@ metadata:
   labels:
     app.kubernetes.io/managed-by: starboard
   name: starboard-trivy-config
-  namespace: dev
+  namespace: starboard-report-system
 ---
 apiVersion: v1
 kind: Secret
@@ -944,13 +944,13 @@ metadata:
   labels:
     app.kubernetes.io/managed-by: starboard
   name: starboard
-  namespace: dev
+  namespace: starboard-report-system
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: report
-  namespace: dev
+  namespace: starboard-report-system
 spec:
   ports:
   - name: report
@@ -972,7 +972,7 @@ metadata:
     app.kubernetes.io/managed-by: starboard
     control-plane: controller-manager
   name: controller-manager
-  namespace: dev
+  namespace: starboard-report-system
 spec:
   replicas: 1
   selector:
@@ -988,7 +988,7 @@ spec:
         control-plane: controller-manager
     spec:
       containers:
-      - image: quay.io/pengli1707/report-gui:v0.0.6
+      - image: jinchi/nginx-starboard-report:0.1
         name: nginx
         ports:
         - containerPort: 8080
@@ -1055,7 +1055,7 @@ metadata:
     app: starboard-operator
     app.kubernetes.io/managed-by: starboard
   name: starboard-operator
-  namespace: dev
+  namespace: starboard-report-system
 spec:
   replicas: 1
   selector:
@@ -1074,7 +1074,7 @@ spec:
       containers:
       - env:
         - name: OPERATOR_NAMESPACE
-          value: dev
+          value: starboard-report-system
         - name: OPERATOR_TARGET_NAMESPACES
           valueFrom:
             configMapKeyRef:

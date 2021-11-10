@@ -8,6 +8,8 @@ This repo aim to enrich the functionality of [starboard](https://github.com/aqua
 The starboard will watch a certain `namespace` for workload(basically the `pod`), if `pod` created or changed it will do scan(vulnerability scan by [Trivy](https://github.com/aquasecurity/trivy) and config audit by [Polaris](https://github.com/FairwindsOps/polarishttps://github.com/FairwindsOps/polaris)) on it.
 
 ----
+
+## Background
 The problem is the scan report display, see the picture upper, two way to check the report;
 - With CLI command `starboard get report` to generate `html` file.
 - Install software `LENS` or `Octant` outside the cluster then connect to the cluster to get a panoramic view of whole cluster
@@ -20,35 +22,69 @@ From the perspective of `devsecops`, we believe a application should be self-gov
 So, the repo will be part of `application`'s artifact, act as a security/compliance reporter after every upgrade.
 
 
-### quick start
-1. Deploy: `kubectl create -f ./release.yaml`
-   check if it works:
+## Quick Start
+
+The quick start steps are being enhanced to more convenient.
+
+1. Update the server information below in [frontend/src/index.js](./frontend/src/index.js) for report service.
+   ```
+   window._env_ = {
+     SERVER_URL: "http://9.30.189.42:8889/",
+     REPORT_URL: "http://9.30.189.42:8888/",
+   }
+   ```
+
+2. Build frontend image as below (update to your image registry).
+   ```
+   # cd frontend/
+   # docker build . -t docker.io/jinchi/nginx-starboard-report:0.2 --no-cache
+     ... 
+   # docker push docker.io/jinchi/nginx-starboard-report:0.2
+   ```
+
+3. Update the container image to new image in [release.yaml](./release.yaml)
+   ```
+         spec:
+      containers:
+      - image: jinchi/nginx-starboard-report:0.1     <-- Update the image.
+        name: nginx
+        ports:
+        - containerPort: 8080
+   ```
+
+
+4. Deploy the starbort report
+   ```
+   # kubectl create -f ./release.yaml
+   ```
+   And then check if it works:
    ```
    # kubectl -n starboard-report-system get po
-    NAME                                  READY   STATUS    RESTARTS   AGE
-    controller-manager-585bd5b76d-mpzzv   2/2     Running   0          13m
-    starboard-operator-7f756cf4c5-nl8qp   1/1     Running   0          13m
-    ```
+     NAME                                  READY   STATUS    RESTARTS   AGE
+     controller-manager-585bd5b76d-mpzzv   2/2     Running   0          13m
+     starboard-operator-7f756cf4c5-nl8qp   1/1     Running   0          13m
+   ```
 
-2. Expose the service
+5. Expose the service
 
   - For OpenShift cluster, you can use `Route` to expose the service:
      ```
      # kubectl apply -f route.yaml
      ```
   
-  - For Kubenertes cluster, you can forward the port to access the nginx(will craete `route/ingress` later)
+  - For Kubenertes cluster, you can forward the port to access the nginx(will craete `ingress` later)
      ```
      # kubectl -n starboard-report-system port-forward service/report 8888:80 --address 0.0.0.0
+     # kubectl -n starboard-report-system port-forward service/report 8889:90 --address 0.0.0.0
      ```
 
-3. Create a sample in the `namespace`: default
+6. Create a sample in the namespace: starboard-report-system
    ```
-   # kubectl create deployment nginx --image nginx:1.16 -n default
+   # kubectl create deployment nginx --image nginx:1.16 -n starboard-report-system
    ```
 
-4. Check the report:
+7. Check the report in `http://9.30.189.42:8888/` as above configuration:
    ![starboard](./report.png)
 
 
-For now, the application will watch `namespace`: default, if you want to change it, please update the configuration in [config](./config/default/configmap.yaml).
+For now, the application will watch resource in namespace: starboard-report-system, if you want to change it, please update the configuration in [config](./config/default/configmap.yaml).

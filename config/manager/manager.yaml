@@ -48,7 +48,7 @@ spec:
             name: nginx-conf
       containers:
       - name: nginx
-        image: quay.io/pengli1707/report-gui:v0.0.6
+        image: docker.io/jinchi/nginx-starboard-report:0.1
         ports:
         - containerPort: 8080
         volumeMounts:
