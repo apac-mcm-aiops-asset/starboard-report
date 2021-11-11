@@ -32,7 +32,7 @@ class ReportCard extends React.Component {
       console.log(this.props)
 
       if(this.props.report.size == 0){
-        fetch(window._env_.SERVER_URL + 'checksize?filename=' + this.props.report.reportName)
+        fetch(window._env_.REPORT_URL + '/server/checksize?filename=' + this.props.report.reportName)
             .then(response => response.json())
             .then(data => this.setState({ready: true}));
       } else {

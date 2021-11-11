@@ -55,7 +55,7 @@ spec:
             name: nginx-conf
       containers:
       - name: nginx
-        image: jinchi/nginx-starboard-report:0.5
+        image: jinchi/nginx-starboard-report:0.6.4
         ports:
         - containerPort: 8080
         volumeMounts:
