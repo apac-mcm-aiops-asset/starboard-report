@@ -42,7 +42,7 @@ The quick start steps are being enhanced to more convenient.
 
   - For OpenShift cluster, you can use `Route` to expose the service:
      ```
-     kubectl apply -f route.yaml
+     kubectl apply -f config/route/route.yaml
      ```
   
   - For Kubenertes cluster, you can forward the port to access the nginx(will craete `ingress` later)
@@ -50,13 +50,14 @@ The quick start steps are being enhanced to more convenient.
      kubectl -n starboard-report-system port-forward service/report 8888:80 --address 0.0.0.0
      ```
 
-6. Create a sample in the namespace: starboard-report-system
+6. Create a sample in the namespace: `starboard-report-system`
    ```
-   kubectl create deployment nginx --image nginx:1.16 -n starboard-report-system
+   kubectl create deployment nginx1 --image nginx:1.16 -n starboard-report-system
    ```
 
 7. Check the report with the above port:
-   ![starboard](./report.png)
+
+   <img src="./report.png" width = "800" height = "300" alt="starBoard Report" align=center />
 
 
-For now, the application will watch resource in namespace: starboard-report-system, if you want to change it, please update the configuration in [config](./config/default/configmap.yaml).
+For now, the application will watch resource in namespace: `starboard-report-system`, if you want to change it, please update the configuration in [config](./config/default/configmap.yaml).
