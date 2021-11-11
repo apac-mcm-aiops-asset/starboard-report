@@ -2,11 +2,10 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
 
-const title = 'My Minimal React Webpack Babel Setup';
+const title = 'Starboard Reports';
 
 window._env_ = {
-  SERVER_URL: "http://9.30.189.222:8889/",
-  REPORT_URL: "http://9.30.189.222:8888/",
+  REPORT_URL: window.location.href,
 }
 
 ReactDOM.render(

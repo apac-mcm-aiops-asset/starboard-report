@@ -16,7 +16,7 @@ class App extends React.Component {
     componentDidMount() {
       console.log('I was triggered during componentDidMount')
   
-      fetch(window._env_.SERVER_URL + 'reportlist')
+      fetch(window._env_.REPORT_URL + '/server/reportlist')
           .then(response => response.json())
           .then(data => this.setReportlists(data));
     }
